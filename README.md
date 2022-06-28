@@ -1,46 +1,34 @@
+# This work is forked from [MAML](https://github.com/YaoZhang93/MAML)
+
 # Modality-aware Mutual Learning for Multi-modal Medical Image Segmentation
-
-## Paper
-
-This is the implementation for the paper:
-
-[Modality-aware Mutual Learning for Multi-modal Medical Image Segmentation](https://arxiv.org/pdf/2107.09842.pdf)
-
-Early Accepted to MICCAI 2021
-
-![image](https://github.com/YaoZhang93/MAML/blob/main/figs/MAML.png)
 
 ## Usage. 
 
 * Data Preparation
 
-  - Download the data from [MICCAI 2018 BraTS Challenge](https://www.med.upenn.edu/sbia/brats2018/data.html).
+  - Download the data from synapse : [MICCAI 2021 BraTS Challenge](https://www.synapse.org/#!Synapse:syn27046444/wiki/616571).
 
-  - Convert the files' name by
+  - Convert the datasets by
 
-  `python dataset_conversion/Task032_BraTS_2018.py`
+  `python nnunet/dataset_conversion/Task521_BraTS_2021.py`
 
-  - Preprocess the data by
+  - Preprocess the datasets by
 
-  `python experiment_planning/nnUNet_plan_and_preprocess.py -t 32 --verify_dataset_integrity`
+  `python nnunet/experiment_planning/nnUNet_plan_and_preprocess.py -t 521 --verify_dataset_integrity`
 
 * Train
 
   - Train the model by
 
-  `python run/run_training.py 3d_fullres MAMLTrainerV2 32 0`
+  `python nnunet/run/run_training.py 3d_fullres MAMLTrainerV2 521 0`
 
 * Test
 
   - inference on the test data by
 
-  `python inference/predict_simple.py -i INPUT_PATH -o OUTPUT_PATH -t 32 -f 0 -tr MAMLTrainerV2`
-
- `MAML` is integrated with the out-of-box [nnUNet](https://github.com/MIC-DKFZ/nnUNet). Please refer to it for more usage.
+  `python nnunet/inference/predict_simple.py -i INPUT_PATH -o OUTPUT_PATH -t 521 -f 0 -tr MAMLTrainerV2`
 
 ## Citation
-
-If you find this code and paper useful for your research, please kindly cite our paper.
 
 ```
 @inproceedings{zhang2021modality,
