@@ -211,7 +211,7 @@ class Generic_UNet(nn.Module):
         # can be expensive, so it makes sense to save and reuse them.
         self._gaussian_3d = self._patch_size_for_gaussian_3d = None
         self._gaussian_2d = self._patch_size_for_gaussian_2d = None
-        
+
         self.convolutional_upsampling = convolutional_upsampling
         self.convolutional_pooling = convolutional_pooling
         self.upscale_logits = upscale_logits
@@ -411,7 +411,7 @@ class Generic_UNet(nn.Module):
             x = torch.cat((x, skips[-(u + 1)]), dim=1)
             x = self.conv_blocks_localization[u](x)
             seg_outputs.append(self.final_nonlin(self.seg_outputs[u](x)))
-            
+
             if u == len(self.tu) - 1:
                 feature_output = x
 
@@ -420,7 +420,7 @@ class Generic_UNet(nn.Module):
         #                                       zip(list(self.upscale_logits_ops)[::-1], seg_outputs[:-1][::-1])])
         # else:
         #     return seg_outputs[-1]
-        
+
         return tuple([feature_output, seg_outputs[-1]] + [i(j) for i, j in zip(list(self.upscale_logits_ops)[::-1], seg_outputs[:-1][::-1])])
 
 
@@ -468,7 +468,7 @@ class Generic_MAML(SegmentationNetwork):
         self._deep_supervision = deep_supervision
         self.do_ds = deep_supervision
         self.conv_op = conv_op
-        
+
         self.convolutional_upsampling = convolutional_upsampling
         self.convolutional_pooling = convolutional_pooling
         self.upscale_logits = upscale_logits
@@ -485,10 +485,10 @@ class Generic_MAML(SegmentationNetwork):
         self.final_nonlin = final_nonlin
         self._deep_supervision = deep_supervision
         self.do_ds = deep_supervision
-        
+
         self.modality_specific_models = []
         for i in range(modality_num):
-            self.modality_specific_models.append(Generic_UNet(1, base_num_features, num_classes, num_pool, num_conv_per_stage, 
+            self.modality_specific_models.append(Generic_UNet(1, base_num_features, num_classes, num_pool, num_conv_per_stage,
                  feat_map_mul_on_downscale, conv_op,
                  norm_op, norm_op_kwargs,
                  dropout_op, dropout_op_kwargs,
@@ -498,26 +498,26 @@ class Generic_MAML(SegmentationNetwork):
                  upscale_logits, convolutional_pooling, convolutional_upsampling,
                  max_num_features, basic_block,
                  seg_output_use_bias))
-        
+
         if nonlin_kwargs is None:
             self.nonlin_kwargs = {'negative_slope': 1e-2, 'inplace': True}
         else:
             self.nonlin_kwargs = nonlin_kwargs
-        
+
         if dropout_op_kwargs is None:
             self.dropout_op_kwargs = {'p': 0.5, 'inplace': True}
         else:
             self.dropout_op_kwargs = dropout_op_kwargs
-        
+
         if norm_op_kwargs is None:
             self.norm_op_kwargs = {'eps': 1e-5, 'affine': True, 'momentum': 0.1}
         else:
             self.norm_op_kwargs = norm_op_kwargs
-        
+
         self.conv_kwargs = {'stride': 1, 'dilation': 1, 'bias': True}
         self.conv_kwargs['kernel_size'] = 3
         self.conv_kwargs['padding'] = 1
-        
+
         self.fusion = conv_op(modality_num*base_num_features, base_num_features, **self.conv_kwargs)
         self.modality_aware_modules = []
         for i in range(modality_num):
@@ -527,27 +527,32 @@ class Generic_MAML(SegmentationNetwork):
                                                              conv_op(base_num_features, base_num_features, **self.conv_kwargs),
                                                              nn.Sigmoid()))
         self.output = conv_op(base_num_features, num_classes, 1, 1, 0, 1, 1, seg_output_use_bias)
-        
+
         self.modality_specific_models = nn.ModuleList(self.modality_specific_models)
         self.modality_aware_modules = nn.ModuleList(self.modality_aware_modules)
-        
-        
+
+
 
     def forward(self, x):
+        # modality split by channel
         x = torch.chunk(x, self.modality_num, dim=1)
+        # F i
         modality_features = []
         final_outputs = []
         for i in range(self.modality_num):
             ms_outputs = self.modality_specific_models[i](x[i])
             modality_features.append(ms_outputs[0])
             final_outputs += ms_outputs[1:]
-            
+
+        # F dual
         modality_features.append(self.fusion(torch.cat(modality_features, dim=1)))
-        
+
+        # A i
         attention_maps = []
         for i in range(self.modality_num):
             attention_maps.append(self.modality_aware_modules[i](torch.cat([modality_features[i], modality_features[-1]], dim=1)))
-        
+
+        # F att
         output = attention_maps[0] * modality_features[0]
         for i in range(1, self.modality_num):
             output += attention_maps[i] * modality_features[i]
