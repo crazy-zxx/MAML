@@ -2,7 +2,26 @@
 
 # Modality-aware Mutual Learning for Multi-modal Medical Image Segmentation
 
-## Usage. 
+## Usage
+
+* Pytorch
+
+```shell
+pip3 install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu113
+```
+
+* requirements
+
+```shell
+cd MAML
+pip install -e .
+```
+
+* add datasets path
+
+```shell
+source init.sh
+```
 
 * Data Preparation
 
