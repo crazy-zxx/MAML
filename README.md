@@ -47,6 +47,10 @@ source init.sh
 
   `python nnunet/inference/predict_simple.py -i INPUT_PATH -o OUTPUT_PATH -t 521 -f 0 -tr MAMLTrainerV2`
 
+  ```shell
+  python nnunet/inference/predict_simple.py -i /datasets/data/nnUNet_raw_data_base/nnUNet_raw_data/Task521_BraTS2021/imagesVal -o /datasets/pred/ -t 521 -f 0 -tr MAMLTrainerV2
+  ```
+
 ## Citation
 
 ```
