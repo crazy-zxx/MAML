@@ -652,7 +652,7 @@ if __name__ == "__main__":
     downloaded_data_dir = "/datasets/RSNA_ASNR_MICCAI_BraTS2021_TrainingData_16July2021"
     downloaded_data_dir_val = "/datasets/RSNA_ASNR_MICCAI_BraTS2021_ValidationData"
 
-    nii2gz(downloaded_data_dir)
+    # nii2gz(downloaded_data_dir)
 
     target_base = join(nnUNet_raw_data, task_name)
     target_imagesTr = join(target_base, "imagesTr")
